@@ -1,14 +1,18 @@
-# Backport Trusty kernel package to Precise
+# Build Precise packages from Precise
 
-There are security updates to the 3.13.0 kernel publicly available for use in Trusty, but not Precise.  It may be possible to backport these packages for use on systems unfortunate enough to be running Precise that need these security updates.
+There are certain packages in Ubuntu Precise for which source packages exist, but the binaries have been lost to history.  This can be used to build those Precise packages for Precise.
 
 # Build instructions
 
 ## General
 
 ```sh
-docker build -t build-kernel .
-docker run -it -v "${PWD}/output:/out" build-kernel
+docker build \
+    --build-arg package="package[=version]" \
+    -t \
+    build-precise-vanilla \
+    .
+docker run --rm -it -v "${PWD}/output:/out" build-precise-vanilla
 ```
 
 All packages built in the docker container will appear in the `output` directory.
@@ -19,16 +23,14 @@ All packages built in the docker container will appear in the `output` directory
 rm output/*
 
 docker build \
-    --build-arg name="Jared Johnson" \
-    --build-arg email="jjohnson@efolder.net" \
-    --build-arg version="efs1204+0" \
-    --build-arg distribution="rb-precise-alpha" \
+    --build-arg package="linux-generic=3.13.0.48.55" \
     -t \
-    build-kernel \
+    build-precise-vanilla \
     .
 
-docker run -it -v "${PWD}/output:/out" build-kernel
+docker run --rm -it -v "${PWD}/output:/out" build-precise-vanilla
 
+# sed -i /^Distribution:/s/trusty/rb-precise-alpha/ output/*.changes
 # dput output/*
 # scp output/* user@repository:/upload-location/
 ```
